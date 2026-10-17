@@ -51,6 +51,7 @@ d = X.loc[oof.index].copy()
 d["y"] = oof["y"].to_numpy()
 d["pred"] = oof["pred"].to_numpy()
 d["base"] = base.loc[oof.index, "pred"].to_numpy()
+d["fold"] = oof["fold"].to_numpy()
 d["err"] = d["pred"] - d["y"]
 d["aerr"] = d["err"].abs()
 d["berr"] = (d["base"] - d["y"]).abs()
@@ -81,6 +82,7 @@ def table(col, name):
         "MAE baseline (min)": g["berr"].mean() / 60,
         "mean signed error (min)": g["err"].mean() / 60,
         "median true (min)": g["y"].median() / 60,
+        "mean true (min)": g["y"].mean() / 60,
     })
     t.index.name = name
     return t
@@ -93,6 +95,7 @@ slices = {
     "Centroid distance bin (miles, known at pickup)": table("dist_bin", "distance bin"),
     "True duration bin (minutes; selecting on the target)": table("true_len", "true duration"),
     "passenger_count missing": table("pax_missing", "passenger_count missing"),
+    "Validation block (0 = Apr 6-10 ... 4 = Apr 26-30): time drift": table("fold", "block"),
 }
 name_of = zones["Zone"].to_dict()
 g = d.groupby("pu", observed=True)
