@@ -88,4 +88,4 @@ res.to_csv(config.REPORTS_DIR / f"{args.out}.csv", index=False)
 lines = ["| model | MAE min (mean ± std) | RMSE min (mean ± std) | per-fold MAE |", "|---|---|---|---|"]
 for r in res.itertuples():
     lines.append(f"| {r.model} | {r.mae_min_mean:.3f} ± {r.mae_min_std:.3f} | {r.rmse_min_mean:.3f} ± {r.rmse_min_std:.3f} | {r.per_fold_mae} |")
-(config.REPORTS_DIR / f"{args.out}.md").write_text("\n".join(lines) + "\n")
+(config.REPORTS_DIR / f"{args.out}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
