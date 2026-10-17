@@ -57,6 +57,8 @@ EXPERIMENTS = [
     ("lgbm log-L2 (+geo)", lambda: models.LGBMModel("log", "regression", n_estimators=1000), "geo", [300, 600, 1000]),
     ("lgbm raw-L1 (+geo)", lambda: models.LGBMModel("raw", "regression_l1", n_estimators=1000), "geo", [300, 600, 1000]),
     ("lgbm raw-L2 (+geo)", lambda: models.LGBMModel("raw", "regression", n_estimators=1000), "geo", [300, 600, 1000]),
+    ("lgbm raw-L2 (+geo, recency half-life 7d)", lambda: models.LGBMModel("raw", "regression", n_estimators=600, recency_halflife_days=7), "geo", [300, 600]),
+    ("lgbm raw-L2 (+geo, recency half-life 14d)", lambda: models.LGBMModel("raw", "regression", n_estimators=600, recency_halflife_days=14), "geo", [300, 600]),
     ("lgbm raw-L1 (+geo, leaves=31)", lambda: models.LGBMModel("raw", "regression_l1", n_estimators=1000, num_leaves=31), "geo", [300, 600, 1000]),
 ]
 
@@ -98,7 +100,10 @@ for name, factory, variant, iters in EXPERIMENTS:
         oof = {c: [] for c in checkpoints}
         t0 = time.time()
         for f in folds:
-            m = factory().fit(Xv.iloc[f.train_idx], y[f.train_idx])
+            m = factory()
+            hl = getattr(m, "recency_halflife_days", None)
+            w = models.recency_weights(sample["pickup"].iloc[f.train_idx], hl) if hl else None
+            m = m.fit(Xv.iloc[f.train_idx], y[f.train_idx], **({"sample_weight": w} if hl else {}))
             for c in checkpoints:
                 p = m.predict(Xv.iloc[f.val_idx], num_iteration=c) if c else m.predict(Xv.iloc[f.val_idx])
                 oof[c].append(pd.DataFrame({"idx": f.val_idx, "fold": f.k, "y": y[f.val_idx], "pred": p}))

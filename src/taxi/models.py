@@ -4,6 +4,8 @@ Interface: ``fit(X, y_seconds)`` then ``predict(X) -> seconds``.
 """
 from __future__ import annotations
 
+import os
+
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
@@ -12,6 +14,12 @@ from sklearn.linear_model import Ridge
 from sklearn.preprocessing import OneHotEncoder
 
 from . import config
+
+
+def recency_weights(pickup: pd.Series, half_life_days: float) -> np.ndarray:
+    """Exponential decay: a trip ``half_life_days`` older than the newest training trip gets half the weight."""
+    age_days = (pickup.max() - pickup).dt.total_seconds().to_numpy() / 86400.0
+    return 0.5 ** (age_days / half_life_days)
 
 
 class GlobalMedian:
@@ -135,23 +143,24 @@ class LGBMModel:
     """LightGBM regressor. ``target`` is 'log' (L2 on log seconds) or 'raw' (seconds)."""
 
     def __init__(self, target="log", objective="regression", n_estimators=600, learning_rate=0.05,
-                 num_leaves=127, min_child_samples=50, drop=(), tag=""):
+                 num_leaves=127, min_child_samples=50, drop=(), tag="", recency_halflife_days=None):
         self.target, self.objective, self.drop = target, objective, list(drop)
+        self.recency_halflife_days = recency_halflife_days  # None = uniform weights
         self.params = dict(
             objective=objective, n_estimators=n_estimators, learning_rate=learning_rate,
             num_leaves=num_leaves, min_child_samples=min_child_samples, subsample=0.8, subsample_freq=1,
             colsample_bytree=0.8, reg_lambda=1.0, cat_smooth=20, random_state=config.SEED,
-            deterministic=True, force_row_wise=True, verbose=-1,
+            deterministic=True, force_row_wise=True, verbose=-1, n_jobs=int(os.environ.get("TAXI_THREADS", "0")) or None,
         )
         self.name = f"lgbm {target}/{objective} leaves={num_leaves} lr={learning_rate}{tag}"
 
     def _frame(self, X):
         return to_lgb_frame(X.drop(columns=self.drop))
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         y = np.asarray(y, dtype="float64")
         t = np.log(y) if self.target == "log" else y
-        self.model_ = lgb.LGBMRegressor(**self.params).fit(self._frame(X), t)
+        self.model_ = lgb.LGBMRegressor(**self.params).fit(self._frame(X), t, sample_weight=sample_weight)
         return self
 
     def predict(self, X, num_iteration=None):
