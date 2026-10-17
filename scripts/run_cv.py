@@ -42,32 +42,11 @@ folds = cv.time_folds(sample["pickup"], month_start)
 for f in folds:
     print(f"fold {f.k}: train {len(f.train_idx):,} val {len(f.val_idx):,} ({f.val_start.date()} - {f.val_end.date()})")
 
-NO_GEO = [c for c in features.GEO_FEATURES]
+from taxi.experiments import EXPERIMENTS, NO_GEO, labels_for  # noqa: E402
 
-# name -> (factory, X-variant, iteration checkpoints for LightGBM or None)
-EXPERIMENTS = [
-    ("baseline: global median", lambda: models.GlobalMedian(), "geo", None),
-    ("baseline: route-hour median", lambda: models.RouteHourMedian(5), "geo", None),
-    ("ridge a=1 (no geo)", lambda: models.RidgeModel(1.0, geo=False), "nogeo", None),
-    ("ridge a=10 (no geo)", lambda: models.RidgeModel(10.0, geo=False), "nogeo", None),
-    ("ridge a=10 (+geo)", lambda: models.RidgeModel(10.0, geo=True), "geo", None),
-    ("ridge a=100 (+geo)", lambda: models.RidgeModel(100.0, geo=True), "geo", None),
-    ("ridge a=10 (+geo, smearing)", lambda: models.RidgeModel(10.0, geo=True, smearing=True), "geo", None),
-    ("lgbm log-L2 (no geo)", lambda: models.LGBMModel("log", "regression", n_estimators=1000), "nogeo", [300, 600, 1000]),
-    ("lgbm log-L2 (+geo)", lambda: models.LGBMModel("log", "regression", n_estimators=1000), "geo", [300, 600, 1000]),
-    ("lgbm raw-L1 (+geo)", lambda: models.LGBMModel("raw", "regression_l1", n_estimators=1000), "geo", [300, 600, 1000]),
-    ("lgbm raw-L2 (+geo)", lambda: models.LGBMModel("raw", "regression", n_estimators=1000), "geo", [300, 600, 1000]),
-    ("lgbm raw-L2 (+geo, recency half-life 7d)", lambda: models.LGBMModel("raw", "regression", n_estimators=600, recency_halflife_days=7), "geo", [300, 600]),
-    ("lgbm raw-L2 (+geo, recency half-life 14d)", lambda: models.LGBMModel("raw", "regression", n_estimators=600, recency_halflife_days=14), "geo", [300, 600]),
-    ("lgbm raw-L1 (+geo, leaves=31)", lambda: models.LGBMModel("raw", "regression_l1", n_estimators=1000, num_leaves=31), "geo", [300, 600, 1000]),
-]
 
 def slug(label):
     return "".join(ch if ch.isalnum() else "_" for ch in label).strip("_")
-
-
-def labels_for(name, iters):
-    return [name] if iters is None else [f"{name} @{c} trees" for c in iters]
 
 
 NL = chr(10)
