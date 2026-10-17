@@ -20,6 +20,8 @@ from taxi import config, cv, data, features, models, zones as zmod
 parser = argparse.ArgumentParser()
 parser.add_argument("--quick", action="store_true", help="tiny subsample for a fast smoke run")
 parser.add_argument("--only", default="", help="run only experiments whose name contains this text")
+parser.add_argument("--summarize-only", action="store_true", help="rebuild the table from existing OOF files, fit nothing")
+parser.add_argument("--skip-existing", action="store_true", help="do not refit experiments whose OOF files exist")
 parser.add_argument("--out", default="cv_results", help="output basename in reports/")
 args = parser.parse_args()
 
@@ -56,36 +58,57 @@ EXPERIMENTS = [
     ("lgbm raw-L1 (+geo)", lambda: models.LGBMModel("raw", "regression_l1", n_estimators=1000), "geo", [300, 600, 1000]),
     ("lgbm raw-L2 (+geo)", lambda: models.LGBMModel("raw", "regression", n_estimators=1000), "geo", [300, 600, 1000]),
     ("lgbm raw-L1 (+geo, leaves=31)", lambda: models.LGBMModel("raw", "regression_l1", n_estimators=1000, num_leaves=31), "geo", [300, 600, 1000]),
-    ("lgbm raw-L1 (+geo, leaves=255, mcs=100)", lambda: models.LGBMModel("raw", "regression_l1", n_estimators=1000, num_leaves=255, min_child_samples=100), "geo", [300, 600, 1000]),
 ]
+
+def slug(label):
+    return "".join(ch if ch.isalnum() else "_" for ch in label).strip("_")
+
+
+def labels_for(name, iters):
+    return [name] if iters is None else [f"{name} @{c} trees" for c in iters]
+
+
+NL = chr(10)
+
+
+def write_results(rows):
+    res = pd.DataFrame(rows)
+    res.to_csv(config.REPORTS_DIR / f"{args.out}.csv", index=False)
+    lines = ["| model | MAE min (mean ± std) | RMSE min (mean ± std) | per-fold MAE |", "|---|---|---|---|"]
+    for r in res.itertuples():
+        lines.append(f"| {r.model} | {r.mae_min_mean:.3f} ± {r.mae_min_std:.3f} | {r.rmse_min_mean:.3f} ± {r.rmse_min_std:.3f} | {r.per_fold_mae} |")
+    (config.REPORTS_DIR / f"{args.out}.md").write_text(NL.join(lines) + NL, encoding="utf-8")
+
+
+def row_from_oof(label):
+    o = pd.read_parquet(oof_dir / f"{slug(label)}.parquet")
+    per_fold = [cv.metrics(g["y"], g["pred"]) for _, g in o.groupby("fold")]
+    return {"model": label, **cv.summarize(per_fold), "per_fold_mae": [round(d["mae_min"], 3) for d in per_fold]}
+
 
 rows = []
 for name, factory, variant, iters in EXPERIMENTS:
     if args.only and args.only not in name:
         continue
-    Xv = X.drop(columns=NO_GEO) if variant == "nogeo" else X
     checkpoints = iters or [None]
-    per_fold = {c: [] for c in checkpoints}
-    oof = {c: [] for c in checkpoints}
-    t0 = time.time()
-    for f in folds:
-        m = factory().fit(Xv.iloc[f.train_idx], y[f.train_idx])
-        for c in checkpoints:
-            p = m.predict(Xv.iloc[f.val_idx], num_iteration=c) if c else m.predict(Xv.iloc[f.val_idx])
-            per_fold[c].append(cv.metrics(y[f.val_idx], p))
-            oof[c].append(pd.DataFrame({"idx": f.val_idx, "fold": f.k, "y": y[f.val_idx], "pred": p}))
-    for c in checkpoints:
-        label = name if c is None else f"{name} @{c} trees"
-        s = cv.summarize(per_fold[c])
-        rows.append({"model": label, **s, "per_fold_mae": [round(d["mae_min"], 3) for d in per_fold[c]]})
-        slug = "".join(ch if ch.isalnum() else "_" for ch in label).strip("_")
-        pd.concat(oof[c]).to_parquet(oof_dir / f"{slug}.parquet")
-        print(f"{label:60s} MAE {s['mae_min_mean']:.3f}±{s['mae_min_std']:.3f}  RMSE {s['rmse_min_mean']:.3f}±{s['rmse_min_std']:.3f}")
-    print(f"   ({time.time() - t0:.0f}s)")
-
-res = pd.DataFrame(rows)
-res.to_csv(config.REPORTS_DIR / f"{args.out}.csv", index=False)
-lines = ["| model | MAE min (mean ± std) | RMSE min (mean ± std) | per-fold MAE |", "|---|---|---|---|"]
-for r in res.itertuples():
-    lines.append(f"| {r.model} | {r.mae_min_mean:.3f} ± {r.mae_min_std:.3f} | {r.rmse_min_mean:.3f} ± {r.rmse_min_std:.3f} | {r.per_fold_mae} |")
-(config.REPORTS_DIR / f"{args.out}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    labels = labels_for(name, iters)
+    have_all = all((oof_dir / f"{slug(l)}.parquet").exists() for l in labels)
+    if not args.summarize_only and not (args.skip_existing and have_all):
+        Xv = X.drop(columns=NO_GEO) if variant == "nogeo" else X
+        oof = {c: [] for c in checkpoints}
+        t0 = time.time()
+        for f in folds:
+            m = factory().fit(Xv.iloc[f.train_idx], y[f.train_idx])
+            for c in checkpoints:
+                p = m.predict(Xv.iloc[f.val_idx], num_iteration=c) if c else m.predict(Xv.iloc[f.val_idx])
+                oof[c].append(pd.DataFrame({"idx": f.val_idx, "fold": f.k, "y": y[f.val_idx], "pred": p}))
+        for c, label in zip(checkpoints, labels):
+            pd.concat(oof[c]).to_parquet(oof_dir / f"{slug(label)}.parquet")
+        print(f"{name}: fitted in {time.time() - t0:.0f}s", flush=True)
+    for label in labels:
+        if not (oof_dir / f"{slug(label)}.parquet").exists():
+            continue
+        r = row_from_oof(label)
+        rows.append(r)
+        print(f"{label:55s} MAE {r['mae_min_mean']:.3f}±{r['mae_min_std']:.3f}  RMSE {r['rmse_min_mean']:.3f}±{r['rmse_min_std']:.3f}", flush=True)
+    write_results(rows)  # written after every experiment so an interrupted run keeps its results
