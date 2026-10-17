@@ -1,0 +1,319 @@
+{
+ "test": "2026-05",
+ "final_model": "lgbm raw-L2 (+geo, recency half-life 7d) @600 trees",
+ "n_train": 500000,
+ "n_test": 3996039,
+ "results": [
+  {
+   "model": "global median",
+   "mae_min": 10.01347797156134,
+   "rmse_min": 16.049340456508116,
+   "bias_min": -4.618412507986033
+  },
+  {
+   "model": "route-hour median (same sample)",
+   "mae_min": 5.450033944029742,
+   "rmse_min": 9.34396526194766,
+   "bias_min": -1.953879418677679
+  },
+  {
+   "model": "route-hour median (all training-month trips)",
+   "mae_min": 4.919842594962995,
+   "rmse_min": 8.3465560071613,
+   "bias_min": -1.758953028236211
+  },
+  {
+   "model": "best Ridge: ridge a=10 (+geo, smearing)",
+   "mae_min": 5.1120082331211565,
+   "rmse_min": 8.191398047168674,
+   "bias_min": -0.6003381181642635
+  },
+  {
+   "model": "FINAL: lgbm raw-L2 (+geo, recency half-life 7d) @600 trees",
+   "mae_min": 4.358657253675036,
+   "rmse_min": 6.970762686995615,
+   "bias_min": -0.4757598168522927
+  }
+ ],
+ "daily": [
+  {
+   "day": "2026-05-01",
+   "dow": "Friday",
+   "trips": 135553,
+   "final_mae": 4.328113979792299,
+   "baseline_mae": 5.592199545565204,
+   "mean_duration": 19.45832921440322,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-02",
+   "dow": "Saturday",
+   "trips": 132592,
+   "final_mae": 3.9958447094013163,
+   "baseline_mae": 4.595999884357025,
+   "mean_duration": 16.799462888660955,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-03",
+   "dow": "Sunday",
+   "trips": 118425,
+   "final_mae": 3.9008083689800257,
+   "baseline_mae": 4.763554148195061,
+   "mean_duration": 16.505526000985153,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-04",
+   "dow": "Monday",
+   "trips": 103647,
+   "final_mae": 4.376730253651466,
+   "baseline_mae": 5.52571138897733,
+   "mean_duration": 19.646759513862758,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-05",
+   "dow": "Tuesday",
+   "trips": 126408,
+   "final_mae": 4.184659680962649,
+   "baseline_mae": 5.2897000189861405,
+   "mean_duration": 19.057327067907096,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-06",
+   "dow": "Wednesday",
+   "trips": 135831,
+   "final_mae": 4.326114517448477,
+   "baseline_mae": 5.620969930771817,
+   "mean_duration": 19.466704213323908,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-07",
+   "dow": "Thursday",
+   "trips": 135023,
+   "final_mae": 4.315698767348342,
+   "baseline_mae": 5.704513058269085,
+   "mean_duration": 20.010741132992155,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-08",
+   "dow": "Friday",
+   "trips": 132193,
+   "final_mae": 4.272675808332687,
+   "baseline_mae": 5.461626750281785,
+   "mean_duration": 19.374485915794835,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-09",
+   "dow": "Saturday",
+   "trips": 130575,
+   "final_mae": 3.858414758121755,
+   "baseline_mae": 4.650171165996554,
+   "mean_duration": 16.89477873508201,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-10",
+   "dow": "Sunday",
+   "trips": 118582,
+   "final_mae": 3.6638083270087187,
+   "baseline_mae": 4.731265776705852,
+   "mean_duration": 17.254580655861204,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-11",
+   "dow": "Monday",
+   "trips": 120641,
+   "final_mae": 4.101065330589065,
+   "baseline_mae": 5.196559627324044,
+   "mean_duration": 19.32979749836291,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-12",
+   "dow": "Tuesday",
+   "trips": 138380,
+   "final_mae": 4.586647826814245,
+   "baseline_mae": 6.0115903671050726,
+   "mean_duration": 20.295054319024906,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-13",
+   "dow": "Wednesday",
+   "trips": 145903,
+   "final_mae": 5.111026672629695,
+   "baseline_mae": 6.795149288682663,
+   "mean_duration": 21.29772063174392,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-14",
+   "dow": "Thursday",
+   "trips": 159848,
+   "final_mae": 4.577124738861222,
+   "baseline_mae": 6.203856006956609,
+   "mean_duration": 20.756272938458203,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-15",
+   "dow": "Friday",
+   "trips": 152300,
+   "final_mae": 4.800287798719613,
+   "baseline_mae": 6.250006730137886,
+   "mean_duration": 20.69949540380827,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-16",
+   "dow": "Saturday",
+   "trips": 151570,
+   "final_mae": 4.636847494381862,
+   "baseline_mae": 5.781753700160542,
+   "mean_duration": 19.13317938906116,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-17",
+   "dow": "Sunday",
+   "trips": 128869,
+   "final_mae": 4.340355147632291,
+   "baseline_mae": 5.15393138251506,
+   "mean_duration": 18.73943009309195,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-18",
+   "dow": "Monday",
+   "trips": 121869,
+   "final_mae": 4.314458338411888,
+   "baseline_mae": 5.5259742701862935,
+   "mean_duration": 19.650687897113567,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-19",
+   "dow": "Tuesday",
+   "trips": 141657,
+   "final_mae": 4.8356204029934515,
+   "baseline_mae": 6.255017342359832,
+   "mean_duration": 20.28809671718776,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-20",
+   "dow": "Wednesday",
+   "trips": 151911,
+   "final_mae": 4.894812703532185,
+   "baseline_mae": 6.444135820754696,
+   "mean_duration": 20.21259421635036,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-21",
+   "dow": "Thursday",
+   "trips": 142598,
+   "final_mae": 4.852470800701479,
+   "baseline_mae": 6.470340514359715,
+   "mean_duration": 20.597382268101,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-22",
+   "dow": "Friday",
+   "trips": 116441,
+   "final_mae": 4.322958865221344,
+   "baseline_mae": 4.738665361284542,
+   "mean_duration": 17.85673889208555,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-23",
+   "dow": "Saturday",
+   "trips": 113725,
+   "final_mae": 4.320079609754791,
+   "baseline_mae": 4.6397365721403965,
+   "mean_duration": 16.140888400381037,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-24",
+   "dow": "Sunday",
+   "trips": 93382,
+   "final_mae": 3.686485126627778,
+   "baseline_mae": 4.7795288885081355,
+   "mean_duration": 15.796193234956059,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-25",
+   "dow": "Monday",
+   "trips": 76353,
+   "final_mae": 4.971679329828897,
+   "baseline_mae": 5.030205427422629,
+   "mean_duration": 15.353277539847813,
+   "holiday": true
+  },
+  {
+   "day": "2026-05-26",
+   "dow": "Tuesday",
+   "trips": 113010,
+   "final_mae": 4.196018247732758,
+   "baseline_mae": 5.2397809190927065,
+   "mean_duration": 19.09852122231071,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-27",
+   "dow": "Wednesday",
+   "trips": 126663,
+   "final_mae": 4.346144906306674,
+   "baseline_mae": 4.565453605235941,
+   "mean_duration": 17.189092315830194,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-28",
+   "dow": "Thursday",
+   "trips": 139333,
+   "final_mae": 4.290640854648632,
+   "baseline_mae": 5.472370926724705,
+   "mean_duration": 19.368552317110808,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-29",
+   "dow": "Friday",
+   "trips": 135914,
+   "final_mae": 4.168376798030463,
+   "baseline_mae": 5.360399713544349,
+   "mean_duration": 19.320733208744745,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-30",
+   "dow": "Saturday",
+   "trips": 139266,
+   "final_mae": 3.8488117732270664,
+   "baseline_mae": 4.399547688117224,
+   "mean_duration": 16.838833599011963,
+   "holiday": false
+  },
+  {
+   "day": "2026-05-31",
+   "dow": "Sunday",
+   "trips": 117577,
+   "final_mae": 4.192188494152745,
+   "baseline_mae": 5.122086944442082,
+   "mean_duration": 18.404899200807414,
+   "holiday": false
+  }
+ ]
+}
