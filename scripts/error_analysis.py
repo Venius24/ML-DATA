@@ -69,8 +69,7 @@ def md_table(t: pd.DataFrame) -> str:
     out = ["| " + " | ".join(map(str, t.columns)) + " |", "|" + "---|" * len(t.columns)]
     for row in t.itertuples(index=False):
         out.append("| " + " | ".join(f"{v:,.0f}" if isinstance(v, (int, np.integer)) else (f"{v:.2f}" if isinstance(v, float) else str(v)) for v in row) + " |")
-    return "
-".join(out)
+    return chr(10).join(out)
 
 
 def table(col, name):
