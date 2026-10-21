@@ -42,12 +42,17 @@ pytest -q                          # 22 tests
 python scripts/run_all.py          # EDA, CV, error analysis, final evaluation, summary
 ```
 
+Want a quick look first? [notebooks/demo.ipynb](notebooks/demo.ipynb) trains the final model in ~20 s and asks it about real
+routes (Midtown to JFK at rush hour vs 3 am, and more). It renders on GitHub with outputs; to run it yourself,
+`pip install jupyter` and download April only: `python scripts/download_data.py 2026-04`.
+
 ## Project layout
 
 ```
 src/taxi/   data cleaning, features, zone geometry, models, CV
 scripts/    one script per step (eda, run_cv, error_analysis, final_eval, ...)
 tests/      cleaning rules, leakage guard, CV folds, pipeline smoke
+notebooks/  demo: train the model and query real routes
 reports/    generated tables and plots
 docs/       full methodology
 ```
