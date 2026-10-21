@@ -113,7 +113,7 @@ line = alt.Chart(curve).mark_line().encode(x="time:T", y="estimate:Q",
                                                    alt.Tooltip("low:Q", format=".0f"), alt.Tooltip("high:Q", format=".0f")])
 rule = alt.Chart(pd.DataFrame({"time": [when]})).mark_rule(strokeDash=[4, 4]).encode(x="time:T")
 st.subheader(f"Across {pd.Timestamp(day):%A, %b %d}")
-st.altair_chart((band + line + rule).properties(height=280), use_container_width=True)
+st.altair_chart((band + line + rule).properties(height=280), width="stretch")
 
 daytime = curve[(curve["time"].dt.hour >= 6) & (curve["time"].dt.hour < 22)]
 fast, slow = daytime.loc[daytime["estimate"].idxmin()], daytime.loc[daytime["estimate"].idxmax()]
