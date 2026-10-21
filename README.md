@@ -31,6 +31,21 @@ conformalized quantile regression (CQR); details in [docs/methodology.md](docs/m
 All numbers come from scripts in this repo ([`reports/final_results.md`](reports/final_results.md),
 [`reports/final_results_v2.md`](reports/final_results_v2.md)); none are typed by hand.
 
+## Interactive demo
+
+![Streamlit demo](reports/app_screenshot.jpg)
+
+A small Streamlit app ([`app/streamlit_app.py`](app/streamlit_app.py)) runs the v2 models: pick two zones, a date and a pickup
+time, and it shows the estimate, the calibrated 80% range, and how both change across the day.
+
+```bash
+pip install -r app/requirements.txt
+streamlit run app/streamlit_app.py   # downloads the trained models from the GitHub release on first start
+```
+
+To retrain the app models yourself: `python scripts/train_app_models.py` (about an hour on 12 threads; `--quick` for a rough
+one-minute version).
+
 ## Why these numbers can be trusted
 
 - **No leakage.** Trip distance, fare, tips and dropoff time are never features. A guard in code (`assert_no_leakage`) and tests enforce it.
@@ -83,6 +98,7 @@ src/taxi/   data cleaning, features, zone geometry, models, CV, prediction inter
 scripts/    one script per step (eda, run_cv, run_cv_v2, error_analysis, final_eval, final_eval_v2, ...)
 tests/      cleaning rules, leakage guard, CV folds, intervals, pipeline smoke
 notebooks/  demo: train the model and query real routes
+app/        Streamlit demo with estimate and 80% range
 reports/    generated tables and plots
 docs/       full methodology
 ```

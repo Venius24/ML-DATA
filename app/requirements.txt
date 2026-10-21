@@ -1,0 +1,9 @@
+# dependencies for the hosted Streamlit demo (Streamlit Community Cloud reads this file)
+pandas==3.0.6
+numpy==2.5.4
+pyarrow==26.0.0
+scikit-learn==1.9.1
+lightgbm==4.7.0
+holidays==0.106
+pyshp==3.1.6
+streamlit==1.66.1
