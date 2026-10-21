@@ -8,7 +8,10 @@ available **at pickup time**, then check it on a month the models never saw.
 Every number here was produced by a script in this repo; the file each one comes from is named next to it.
 Raw data is not committed - `scripts/download_data.py` fetches it.
 
-## Headline result
+## Headline result (v1)
+
+This section and the ones after it describe v1 (500k-trip sample, tested on May). v2 (all trips, prediction intervals,
+tested on June) has [its own section](#v2-all-training-trips-and-prediction-intervals).
 
 Held-out month **2026-05** (3,996,039 cleaned trips), models trained on a 500,000-trip sample of **2026-04**
 (`reports/final_results.md`, evaluated exactly once):
@@ -180,7 +183,91 @@ Weekend days average 4.04 vs 4.48 on weekdays. **Memorial Day (2026-05-25) is a 
 final MAE 4.97 vs baseline 5.03 (1.2% gain), against a 19.7% average gain on other days. The model has no holiday knowledge from April,
 and mean duration that day (15.35 min) was well below the other days' 18.85 min.
 
-## Limits: what these numbers do not prove
+## v2: all training trips and prediction intervals
+
+v1 left two obvious questions: the learning curve said more data would help a little, and a single number says nothing
+about how wrong it might be. v2 answers both, with the same evaluation discipline as v1.
+
+### Why a new test month
+
+May had already been opened for v1. Choosing v2 settings and then scoring them on May again would turn May into a
+validation set and make its number optimistic. So v2 is tested on **June 2026**, opened once. All v2 choices were made by CV
+on April and [committed and pushed](https://github.com/Venius24/ML-DATA/commit/fe97593) before `final_eval_v2.py` read June.
+The v1 model is re-run on June as well, so v1 vs v2 is measured on the same trips.
+
+### Point model: more data, then bigger trees (`reports/cv_v2.md`)
+
+Same five time-based folds as v1, but on all 3,741,803 cleaned April trips instead of the 500k sample. Fold training sizes
+grow from 557,569 to 3,105,574 trips.
+
+| configuration (recency half-life 7 d, raw-seconds L2) | CV MAE min | CV RMSE min |
+|---|---|---|
+| v1: 500k sample, 127 leaves, 600 trees (`cv_results.md`) | 4.203 ± 0.110 | 6.859 ± 0.104 |
+| all trips, 127 leaves, 600 / 1000 / 1500 trees | 4.124 / 4.119 / 4.118 | 6.730 / 6.747 / 6.766 |
+| **all trips, 255 leaves, 600 trees (selected)** | **4.106 ± 0.099** | **6.732 ± 0.128** |
+| all trips, 255 leaves, 1000 / 1500 trees | 4.109 / 4.116 | 6.761 / 6.790 |
+
+With 7x more data, 255 leaves (abandoned in v1 because of compute) becomes slightly better than 127; more trees stop
+helping after 600. The top rows are within one fold-std of each other; the pre-declared rule "lowest mean CV MAE" decides.
+Total gain over v1 in CV: 2.3% MAE, 1.9% RMSE.
+
+### Prediction intervals: quantile models + CQR
+
+Two LightGBM models with the quantile (pinball) loss predict the 10th and 90th percentile of the duration, giving a nominal
+80% interval. Same features, recency weights and folds as the point model.
+
+Raw quantile models under-cover in CV (75.3% instead of 80%): the training month drifts and tree models shrink extreme
+quantiles toward the middle. **Conformalized quantile regression (CQR)** fixes this with one constant: both ends are moved
+by `q`, chosen so that the calibration rows reach 80% coverage (`src/taxi/intervals.py`). To keep the CV estimate honest,
+the `q` used on fold *k* is learned on the out-of-fold predictions of the *other* folds only. The final `q` (+0.49 min) is
+learned on all out-of-fold predictions and frozen before June.
+
+| quantile models (127 leaves) | coverage raw | width raw, min | coverage after CQR | width after CQR, min |
+|---|---|---|---|---|
+| 600 trees | 0.757 ± 0.018 | 11.11 | 0.800 ± 0.019 | 12.02 |
+| **1000 trees (selected: narrowest calibrated interval)** | 0.753 ± 0.018 | 10.98 | **0.800 ± 0.020** | **11.96** |
+
+### Results on June 2026 (`reports/final_results_v2.md`, evaluated once)
+
+3,744,498 cleaned trips (3,837,248 raw; same cleaning rules).
+
+| model | MAE (min) | RMSE (min) | mean signed error (min) |
+|---|---:|---:|---:|
+| global median | 8.966 | 13.511 | -3.42 |
+| route-hour median (all April trips) | 4.431 | 7.050 | -1.22 |
+| v1 final model (500k sample, 600 trees) | 4.071 | 6.257 | -0.22 |
+| **v2 final model (all trips, 255 leaves, 600 trees)** | **4.006** | **6.159** | -0.22 |
+
+- v2 beats v1 on all 30 days (1.6% MAE, 1.6% RMSE) and the route-hour median on 28 of 30 days (9.6% MAE, 12.6% RMSE).
+  The two days it loses to the baseline are June 18 and 20.
+- June MAE is lower than the April CV estimate (4.006 vs 4.106) and lower than May for every model, including the global
+  median (8.97 vs 10.01). June trips were simply easier to predict; that is a property of the month, not a model gain.
+  Model comparisons are only meaningful inside one month.
+- June 19 (Juneteenth) is a federal holiday; unlike Memorial Day in May it was not a weak day (v2 MAE 4.08).
+
+**80% interval on June:** coverage **0.805** (raw quantile models: 0.758), mean width **11.97 min**; 8.3% of trips fall below
+the interval and 11.2% above it (target 10% each). Daily coverage ranges from 0.757 to 0.833.
+Coverage is not uniform by zone-centroid distance:
+
+| distance (mi) | trips | coverage | mean width (min) |
+|---|---:|---:|---:|
+| <= 1 | 1,105,929 | 0.835 | 9.61 |
+| 1-2 | 1,180,066 | 0.812 | 11.10 |
+| 2-4 | 838,293 | 0.792 | 12.44 |
+| 4-8 | 410,972 | 0.762 | 14.47 |
+| > 8 | 184,858 | 0.737 | 19.94 |
+
+CQR adds the same constant to every interval, so it over-covers short trips and under-covers long ones. A natural next step is
+to calibrate per distance group (or with a scaled score) so long trips get proportionally wider ranges.
+
+### v2 limits
+
+- Still one training month; June is two months after April, so there is drift the model cannot know about.
+- 80% coverage holds on average, not for every slice (long trips: 74%).
+- The quantile models are slow to train (about 45 minutes for 5 CV folds on all trips with 12 CPU threads).
+- The v2 test still uses a single month; its accuracy is one draw.
+
+## Limits: what these numbers do not prove (v1)
 
 - **One train month and one test month.** The test month's accuracy is a single draw; seasonality, weather, strikes or events in other months
   may shift it (the gap from CV to test is already 3.7% MAE).
@@ -201,7 +288,7 @@ and mean duration that day (15.35 min) was well below the other days' 18.85 min.
 ```bash
 python -m venv .venv && source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-python scripts/download_data.py                          # ~135 MB: Apr+May 2026 parquet, zone lookup and shapefile
+python scripts/download_data.py                          # ~200 MB: Apr, May, Jun 2026 parquet, zone lookup and shapefile
 pytest -q                                                # unit + smoke tests (no data required except one skippable test)
 python scripts/run_all.py                                # everything below, or run the steps individually:
 python scripts/eda.py                                    # reports/EDA.md, plots, cleaning log (training month only)
@@ -211,6 +298,8 @@ python scripts/error_analysis.py --out error_analysis_after_fix                 
 python scripts/learning_curve.py                         # reports/learning_curve.md
 python scripts/final_eval.py                             # reports/final_results.*  (delete final_results.json to rerun; opens the May file)
 python scripts/summary.py                                # reports/summary.md
+python scripts/run_cv_v2.py                              # reports/cv_v2.*  (all April trips; slow: quantile models ~45 min each)
+python scripts/final_eval_v2.py                          # reports/final_results_v2.*  (delete final_results_v2.json to rerun; opens June)
 ```
 
 `make all` runs the same steps. If the machine is busy, `TAXI_THREADS=4` caps LightGBM threads. Seeds are fixed (`config.SEED = 42`),
@@ -221,6 +310,6 @@ Layout: `src/taxi/` (data, features, zones, models, cv, experiments), `scripts/`
 ## How this was built
 
 This project was developed autonomously by an AI coding agent (Claude Code) working from a written brief, with the human owner supplying only the repository.
-It was verified by 22 pytest tests (cleaning rules, leakage guard, CV fold ordering, pipeline smoke) and by the temporal holdout: the test month was
+It was verified by pytest tests (cleaning rules, leakage guard, CV fold ordering, interval calibration, pipeline smoke) and by the temporal holdout: the test month was
 read once, after all model choices were made, and the script refuses to rerun. Results were produced by the scripts above rather than typed in.
 A human should still review the modelling choices and the data-license question before relying on this.
