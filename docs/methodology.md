@@ -306,10 +306,3 @@ python scripts/final_eval_v2.py                          # reports/final_results
 LightGBM runs with `deterministic=True`, and package versions are pinned in `requirements.txt` (Python 3.13). Re-running the CV with the
 same sample reproduced the 4.203 MAE exactly (compare `reports/cv_results.md` with `reports/learning_curve.md`).
 Layout: `src/taxi/` (data, features, zones, models, cv, experiments), `scripts/`, `tests/`, `reports/`.
-
-## How this was built
-
-This project was developed autonomously by an AI coding agent (Claude Code) working from a written brief, with the human owner supplying only the repository.
-It was verified by pytest tests (cleaning rules, leakage guard, CV fold ordering, interval calibration, pipeline smoke) and by the temporal holdout: the test month was
-read once, after all model choices were made, and the script refuses to rerun. Results were produced by the scripts above rather than typed in.
-A human should still review the modelling choices and the data-license question before relying on this.
