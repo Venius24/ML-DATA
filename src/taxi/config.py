@@ -7,6 +7,7 @@ REPORTS_DIR = ROOT / "reports"
 
 TRAIN_MONTH = "2026-04"  # used for training + time-based CV
 TEST_MONTH = "2026-05"   # frozen holdout, evaluated once in scripts/final_eval.py
+TEST_MONTH_V2 = "2026-06"  # second frozen holdout for the v2 model, evaluated once in scripts/final_eval_v2.py
 
 SEED = 42
 MAX_TRAIN_ROWS = 500_000  # subsample cap (after cleaning) so it runs on a laptop CPU

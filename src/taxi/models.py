@@ -143,7 +143,7 @@ class LGBMModel:
     """LightGBM regressor. ``target`` is 'log' (L2 on log seconds) or 'raw' (seconds)."""
 
     def __init__(self, target="log", objective="regression", n_estimators=600, learning_rate=0.05,
-                 num_leaves=127, min_child_samples=50, drop=(), tag="", recency_halflife_days=None):
+                 num_leaves=127, min_child_samples=50, drop=(), tag="", recency_halflife_days=None, alpha=None):
         self.target, self.objective, self.drop = target, objective, list(drop)
         self.recency_halflife_days = recency_halflife_days  # None = uniform weights
         self.params = dict(
@@ -152,6 +152,8 @@ class LGBMModel:
             colsample_bytree=0.8, reg_lambda=1.0, cat_smooth=20, random_state=config.SEED,
             deterministic=True, force_row_wise=True, verbose=-1, n_jobs=int(os.environ.get("TAXI_THREADS", "0")) or None,
         )
+        if alpha is not None:  # quantile level for objective="quantile"
+            self.params["alpha"] = alpha
         self.name = f"lgbm {target}/{objective} leaves={num_leaves} lr={learning_rate}{tag}"
 
     def _frame(self, X):

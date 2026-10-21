@@ -2,8 +2,8 @@
 
 Usage: python scripts/run_all.py [--skip-final]
 
-final_eval.py refuses to run if reports/final_results.json already exists (the test month is frozen);
-delete that file first if you really want to reproduce the held-out numbers from scratch.
+final_eval.py / final_eval_v2.py refuse to run if reports/final_results.json / final_results_v2.json already exist
+(the test months are frozen); delete those files first if you really want to reproduce the held-out numbers from scratch.
 """
 import subprocess
 import sys
@@ -20,11 +20,14 @@ STEPS = [
     ["scripts/learning_curve.py"],
     ["scripts/final_eval.py"],
     ["scripts/summary.py"],
+    # v2: all training-month trips + prediction intervals, tested once on a second month
+    ["scripts/run_cv_v2.py"],
+    ["scripts/final_eval_v2.py"],
 ]
 
 if __name__ == "__main__":
     skip = "--skip-final" in sys.argv
-    steps = [st for st in STEPS if not (skip and st[0] in ("scripts/final_eval.py", "scripts/summary.py"))]
+    steps = [st for st in STEPS if not (skip and st[0] in ("scripts/final_eval.py", "scripts/summary.py", "scripts/final_eval_v2.py"))]
     for step in steps:
         print("==>", " ".join(step), flush=True)
         subprocess.run([sys.executable, *step], cwd=ROOT, check=True)

@@ -1,6 +1,6 @@
 PY ?= python
 
-.PHONY: setup data eda cv errors curve final summary test all
+.PHONY: setup data eda cv errors curve final summary cv2 final2 test all
 setup:
 	$(PY) -m venv .venv
 	.venv/bin/python -m pip install -r requirements.txt || .venv/Scripts/python -m pip install -r requirements.txt
@@ -19,6 +19,10 @@ final:
 	$(PY) scripts/final_eval.py
 summary:
 	$(PY) scripts/summary.py
+cv2:
+	$(PY) scripts/run_cv_v2.py
+final2:
+	$(PY) scripts/final_eval_v2.py
 test:
 	$(PY) -m pytest -q
 all:

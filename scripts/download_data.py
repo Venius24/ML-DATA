@@ -1,7 +1,7 @@
 """Download NYC TLC yellow taxi parquet files and the zone lookup into data/.
 
 Usage: python scripts/download_data.py [YYYY-MM ...]
-Defaults to the train and test months from src/taxi/config.py.
+Defaults to the train month and both test months from src/taxi/config.py.
 """
 import sys
 from pathlib import Path
@@ -36,4 +36,4 @@ def main(months: list[str]) -> None:
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:] or [config.TRAIN_MONTH, config.TEST_MONTH])
+    main(sys.argv[1:] or [config.TRAIN_MONTH, config.TEST_MONTH, config.TEST_MONTH_V2])
