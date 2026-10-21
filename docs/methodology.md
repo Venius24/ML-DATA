@@ -35,7 +35,7 @@ Cross-validation inside April predicted MAE 4.203 ± 0.110 and RMSE 6.859 ± 0.1
   (`yellow_tripdata_2026-04.parquet`, `yellow_tripdata_2026-05.parquet`) plus the TLC taxi zone lookup CSV and zone
   shapefile. Source page: <https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page>.
   TLC publishes these files openly, but I did not find or verify a formal license text; check the terms and disclaimer on the TLC page
-  before redistributing the data. This repo does not redistribute it. The repo itself has no license file yet (owner's decision).
+  before redistributing the data. This repo does not redistribute it. The code in this repo is MIT-licensed (see `LICENSE`); that license does not cover the TLC data.
 - **Split (temporal)**: April 2026 is the training/validation month, May 2026 is the frozen test month.
   Time-based CV inside April chooses everything; May was opened once at the very end (see "Final evaluation").
 

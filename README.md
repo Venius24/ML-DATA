@@ -1,6 +1,6 @@
 # NYC Taxi Trip Duration
 
-![Python](https://img.shields.io/badge/python-3.13-blue) ![LightGBM](https://img.shields.io/badge/model-LightGBM-green) ![tests](https://img.shields.io/badge/tests-22%20pytest-brightgreen)
+![Python](https://img.shields.io/badge/python-3.13-blue) ![LightGBM](https://img.shields.io/badge/model-LightGBM-green) [![tests](https://github.com/Venius24/ML-DATA/actions/workflows/tests.yml/badge.svg)](https://github.com/Venius24/ML-DATA/actions/workflows/tests.yml) ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
 Predicts how long a NYC yellow taxi ride will take **using only what is known at pickup** (time, pickup and dropoff zone),
 trained on April 2026 and tested once on May 2026, a month the model never saw (~4M trips).
@@ -58,4 +58,4 @@ The full write-up is in [docs/methodology.md](docs/methodology.md): cleaning rul
 all 26 CV experiments, the error analysis, and the limits of these results.
 
 **Data:** NYC TLC yellow taxi trip records ([source](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page)).
-The data is downloaded by script and not redistributed here; check the TLC terms before reusing it.
+The data is downloaded by script and not redistributed here; check the TLC terms before reusing it. The code is MIT-licensed ([LICENSE](LICENSE)).
