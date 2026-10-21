@@ -1,6 +1,8 @@
 # NYC Taxi Trip Duration
 
-![Python](https://img.shields.io/badge/python-3.13-blue) ![LightGBM](https://img.shields.io/badge/model-LightGBM-green) [![tests](https://github.com/Venius24/ML-DATA/actions/workflows/tests.yml/badge.svg)](https://github.com/Venius24/ML-DATA/actions/workflows/tests.yml) ![license](https://img.shields.io/badge/license-MIT-lightgrey)
+![Python](https://img.shields.io/badge/python-3.13-blue) ![LightGBM](https://img.shields.io/badge/model-LightGBM-green) [![tests](https://github.com/Venius24/ML-DATA/actions/workflows/tests.yml/badge.svg)](https://github.com/Venius24/ML-DATA/actions/workflows/tests.yml) ![license](https://img.shields.io/badge/license-MIT-lightgrey) [![Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://venius24.streamlit.app)
+
+**Live demo: [venius24.streamlit.app](https://venius24.streamlit.app)** (pick two zones and a time, get an estimate with an 80% range)
 
 Predicts how long a NYC yellow taxi ride will take **using only what is known at pickup** (time, pickup and dropoff zone),
 together with an **80% range** for the ride. Trained on April 2026, then tested on months the model never saw:
@@ -33,10 +35,14 @@ All numbers come from scripts in this repo ([`reports/final_results.md`](reports
 
 ## Interactive demo
 
-![Streamlit demo](reports/app_screenshot.jpg)
+[![Streamlit demo](reports/app_screenshot.jpg)](https://venius24.streamlit.app)
+
+Try it: **[venius24.streamlit.app](https://venius24.streamlit.app)**. The first load takes about half a minute while the models load.
 
 A small Streamlit app ([`app/streamlit_app.py`](app/streamlit_app.py)) runs the v2 models: pick two zones, a date and a pickup
 time, and it shows the estimate, the calibrated 80% range, and how both change across the day.
+
+To run it locally:
 
 ```bash
 pip install -r app/requirements.txt
